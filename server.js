@@ -13,7 +13,16 @@ server.use(bodyParser.json()); // middleware - для обработки дан�
 
 // GET /todos - GET-запросы используются для получения данных
 server.get('/todos', function(request, response) {
-  response.json(todos); // response.json - метод Express для отправки объектов в формате json
+  var queryParams = request.query; // req.query - объект параметров и их значений, которые были переданы после символа '?' в запросе. Важно: все переданные значения имеют тип String
+  var filteredTodos = todos; // массив для организации поиска
+
+  if (queryParams.hasOwnProperty('completed') && queryParams.completed === 'true') {
+    filteredTodos = _.where(filteredTodos, { completed: true });
+  } else if (queryParams.hasOwnProperty('completed') && queryParams.completed === 'false') {
+    filteredTodos = _.where(filteredTodos, { completed: false });
+  }
+
+  response.json(filteredTodos); // response.json - метод Express для отправки объектов в формате json
 });
 
 // GET /todos/:id
