@@ -14,22 +14,44 @@ server.use(bodyParser.json()); // middleware - для обработки дан�
 
 // GET /todos - GET-запросы используются для получения данных
 server.get('/todos', function(request, response) {
-  var queryParams = request.query; // req.query - объект параметров и их значений, которые были переданы после символа '?' в запросе. Важно: все переданные значения имеют тип String
-  var filteredTodos = todos; // массив для организации поиска
-
-  if (queryParams.hasOwnProperty('completed') && queryParams.completed === 'true') {
-    filteredTodos = _.where(filteredTodos, { completed: true });
-  } else if (queryParams.hasOwnProperty('completed') && queryParams.completed === 'false') {
-    filteredTodos = _.where(filteredTodos, { completed: false });
+  var query = request.query;
+  var where = {};
+  if (query.hasOwnProperty('completed') && query.completed === 'true') {
+    where.completed = true;
+  } else if (query.hasOwnProperty('completed')&& query.completed === 'false') {
+    where.completed = false;
   }
 
-  if (queryParams.hasOwnProperty('q') && queryParams.q.length > 0){
-    filteredTodos = _.filter(filteredTodos, function(todo) {
-      return todo.description.toLowerCase().indexOf(queryParams.q.toLowerCase()) > -1;
+  if(query.hasOwnProperty('q') && query.q.length > 0) {
+    where.description = {
+      $like: '%' + query.q + '%'
+    };
+  }
+
+  db.todo.findAll({where: where})
+    .then(function(todos){
+      response.json(todos);
+    })
+    .catch(function(){
+      response.status(500).send();
     });
-  }
 
-  response.json(filteredTodos); // response.json - метод Express для отправки объектов в формате json
+  // var queryParams = request.query; // req.query - объект параметров и их значений, которые были переданы после символа '?' в запросе. Важно: все переданные значения имеют тип String
+  // var filteredTodos = todos; // массив для организации поиска
+  //
+  // if (queryParams.hasOwnProperty('completed') && queryParams.completed === 'true') {
+  //   filteredTodos = _.where(filteredTodos, { completed: true });
+  // } else if (queryParams.hasOwnProperty('completed') && queryParams.completed === 'false') {
+  //   filteredTodos = _.where(filteredTodos, { completed: false });
+  // }
+  //
+  // if (queryParams.hasOwnProperty('q') && queryParams.q.length > 0){
+  //   filteredTodos = _.filter(filteredTodos, function(todo) {
+  //     return todo.description.toLowerCase().indexOf(queryParams.q.toLowerCase()) > -1;
+  //   });
+  // }
+  //
+  // response.json(filteredTodos); // response.json - метод Express для отправки объектов в формате json
 });
 
 // GET /todos/:id
