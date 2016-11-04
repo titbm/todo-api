@@ -22,6 +22,12 @@ server.get('/todos', function(request, response) {
     filteredTodos = _.where(filteredTodos, { completed: false });
   }
 
+  if (queryParams.hasOwnProperty('q') && queryParams.q.length > 0){
+    filteredTodos = _.filter(filteredTodos, function(todo) {
+      return todo.description.toLowerCase().indexOf(queryParams.q.toLowerCase()) > -1;
+    });
+  }
+
   response.json(filteredTodos); // response.json - метод Express для отправки объектов в формате json
 });
 
