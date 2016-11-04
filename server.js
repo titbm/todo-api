@@ -107,14 +107,30 @@ server.post('/todos', function(request, response){
 // DELETE /todos/:id
 server.delete('/todos/:id', function(request, response){
   var todoId = parseInt(request.params.id, 10);
-  var matchedTodo = _.findWhere(todos, { id: todoId });
 
-  if (!matchedTodo) {
-    response.status(404).json({ 'error': 'No todo found with that id' }); // если в коллекции нет модели с заданным id отправить ошибку 404 и содержание ошибки
-  } else {
-    todos = _.without(todos, matchedTodo); // удалить из коллекции найденную модель
-    response.json(matchedTodo);
-  }
+  db.todo.destroy({
+    where: {
+      id: todoId
+    }
+  })
+  .then(function(rowsDeleted){
+    if(rowsDeleted === 0) {
+      response.status(404).json({ error: 'No todo with id' });
+    } else {
+      response.status(204).send();
+    }
+  })
+  .catch(function(){
+    response.status(500).send()
+  });
+  // var matchedTodo = _.findWhere(todos, { id: todoId });
+  //
+  // if (!matchedTodo) {
+  //   response.status(404).json({ 'error': 'No todo found with that id' }); // если в коллекции нет модели с заданным id отправить ошибку 404 и содержание ошибки
+  // } else {
+  //   todos = _.without(todos, matchedTodo); // удалить из коллекции найденную модель
+  //   response.json(matchedTodo);
+  // }
 });
 
 
