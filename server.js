@@ -35,13 +35,25 @@ server.get('/todos', function(request, response) {
 // GET /todos/:id
 server.get('/todos/:id', function(request, response) {
   var todoId = parseInt(request.params.id, 10); // request.params - объект с данными, которые передаются в запросе через двоеточие
-  var matchedTodo = _.findWhere(todos, { id: todoId }); // underscore-функция для поиска модели в коллекции todos элемента с id = totoId
 
-  if (matchedTodo) {
-    response.status(200).json(matchedTodo); // status(200) - отправить страницу со статусом 200 и данные в JSON-формате. status(200) - указывать необязательно
-  } else {
-    response.status(404).send(); // status(404) - отправить страницу со статусом 404, если адреса не существует
-  }
+  db.todo.findById(todoId)
+    .then(function(todo){
+      if (!!todo) {
+        response.json(todo.toJSON());
+      } else {
+        response.status(404).send();
+      }
+    })
+    .catch(function(e){
+      response.status(500).send();
+    });
+  // var matchedTodo = _.findWhere(todos, { id: todoId }); // underscore-функция для поиска модели в коллекции todos элемента с id = totoId
+  //
+  // if (matchedTodo) {
+  //   response.status(200).json(matchedTodo); // status(200) - отправить страницу со статусом 200 и данные в JSON-формате. status(200) - указывать необязательно
+  // } else {
+  //   response.status(404).send(); // status(404) - отправить страницу со статусом 404, если адреса не существует
+  // }
 });
 
 // POST /todos - POST-запросы используются для передачи данных.
